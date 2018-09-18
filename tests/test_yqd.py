@@ -6,6 +6,45 @@ Created on 2018
 from yahoo_quote import yqd
 import json
 import numpy as np
+import pandas as pd
+import requests
+import matplotlib.pyplot as plt
+def read_balancesheet(ticker):
+	print("Reading Balancesheet: {}".format(ticker))
+	filename = 'bs_data.csv'
+	data = pd.read_csv(filename)
+	data['date'] = pd.to_datetime(data['date'], format='%Y%m%d')
+	#df = pd.DataFrame(data)#columns=['model', 'launched', 'discontinued'])
+	dfLiab = (data.loc[data['tag'] == 'Liabilities'])
+	dfLiabCurrent = (data.loc[data['tag'] == 'LiabilitiesCurrent'])
+	dfAsset = (data.loc[data['tag'] == 'Assets'])
+	dfAssetCurrent = (data.loc[data['tag'] == 'AssetsCurrent'])
+
+	allFrames = [dfLiab,dfLiabCurrent,dfAsset,dfAssetCurrent]
+
+	all = pd.concat(allFrames)
+	fig, ax = plt.subplots()
+
+	all.groupby('tag').plot(x='date', y='value', ax=ax, legend=False)
+	#dfLiab.plot(x='date', y='value')
+	#dfAsset.plot(x='date', y='value')
+
+	plt.show()
+	print(dfLiabVal)
+	#liabBoth = df[df['tag'].str.match("Liabil")]
+	#print(liabBoth)
+def download_balancesheet(ticker):
+	print("Downloading balance sheet: {}".format(ticker))
+	#url = "https://data.invisement.com/q/{}.csv".format(ticker)
+	url = 'https://data.invisement.com/q/AAPL.csv'
+	r = requests.get(url, stream=True)
+	filename = 'bs_data.csv'
+	with open(filename, 'w') as outfile:
+		outfile.write(r.content.decode())
+
+	#data = pd.read_csv(filename)
+	#print(data)
+	
 def load_quote(ticker):
 	print('===', ticker, '===')
 	#print(yqd.load_yahoo_quote(ticker, '20170515', '20170517'))
@@ -68,6 +107,8 @@ def test():
 
 	# Download quote for index
 	#load_quote('^DJI')
-	read_data()
+	#read_data()
+	# pandas
+	read_balancesheet('VALE')
 if __name__ == '__main__':
 	test()
